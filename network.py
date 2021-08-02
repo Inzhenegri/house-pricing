@@ -9,13 +9,23 @@ from tabulate import tabulate
 
 # print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
-path = '/home/house_pricing/housing.csv'
+rows = 1000
+
+path = 'housing.csv'
 df = pd.read_csv(path)
-df = df.head(n=5)
+df = df.head(n=rows)
 df = df.dropna()
 df = df.drop(labels='ocean_proximity', axis=1)
 
-plt.figure(figsize=(8, 4))
-sns.displot(data=df['median_house_value'])
+plt.figure(figsize=(12, 8))
+sns.scatterplot(
+    x=df.median_house_value,
+    y=df.total_rooms,
+    hue=df.population,
+    palette=sns.color_palette(palette='coolwarm', as_cmap=True)
+)
+sns.displot(x=df.median_house_value, kind='kde')
 
-print(tabulate(tabular_data=df, headers='keys', tablefmt='grid'))
+# print(tabulate(tabular_data=df, headers='keys', tablefmt='grid'))
+
+plt.show()
