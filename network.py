@@ -1,31 +1,35 @@
-import tensorflow as tf
+# import tensorflow as tf
 import numpy as np
 import pandas as pd
 import seaborn as sns
 from pylab import rcParams
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
 from tabulate import tabulate
 
 
 # print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+sns.set_style(style='white')
 
-rows = 1000
+rows = 10
 
 path = 'housing.csv'
 df = pd.read_csv(path)
-df = df.head(n=rows)
+# df = df.head(n=rows)
 df = df.dropna()
 df = df.drop(labels='ocean_proximity', axis=1)
 
-plt.figure(figsize=(12, 8))
-sns.scatterplot(
-    x=df.median_house_value,
-    y=df.total_rooms,
-    hue=df.population,
-    palette=sns.color_palette(palette='coolwarm', as_cmap=True)
-)
-sns.displot(x=df.median_house_value, kind='kde')
+plt.figure(figsize=(10, 8))
 
-# print(tabulate(tabular_data=df, headers='keys', tablefmt='grid'))
+sns.heatmap(data=df.corr(), annot=True)
 
-plt.show()
+X = df.drop(labels='median_house_value', axis=1)
+y = df.median_house_value
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+scaler = MinMaxScaler()
+
+print(X_train)
+X_train = scaler.fit_transform(X=X)
+print(X_train)
