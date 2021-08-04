@@ -1,4 +1,8 @@
-# import tensorflow as tf
+import tensorflow as tf
+from tensorflow.keras import layers
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.optimizers import Adam
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -30,6 +34,15 @@ y = df.median_house_value
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 scaler = MinMaxScaler()
 
-print(X_train)
-X_train = scaler.fit_transform(X=X)
-print(X_train)
+X_train = scaler.fit_transform(X=X_train)
+X_test = scaler.transform(X=X_test)
+
+
+model = Sequential([
+    Dense(units=32, input_shape=(8,), activation='relu'),
+    Dense(units=1, activation='relu')
+])
+
+model.compile(loss='categorical_crossentropy', metrics=['accuracy'])
+
+model.fit(x=X_train, y=y_train, epochs=1)
