@@ -1,6 +1,6 @@
 # A regression example
 
-This example shows regression usage with tensorflow. All code is taken from this (tutorial)[https://medium.com/analytics-vidhya/house-price-prediction-regression-with-tensorflow-keras-4fc49fae7123].
+This example shows regression usage with tensorflow. All code is taken from this [tutorial](https://medium.com/analytics-vidhya/house-price-prediction-regression-with-tensorflow-keras-4fc49fae7123).
 
 ## Run main.py
 To run the main file, use this command:
