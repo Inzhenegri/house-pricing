@@ -1,7 +1,6 @@
 import tensorflow as tf
-from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.layers import Dense, Dropout, InputLayer
 from tensorflow.keras.optimizers import Adam
 import numpy as np
 import pandas as pd
@@ -20,7 +19,7 @@ rows = 10
 
 path = 'housing.csv'
 df = pd.read_csv(path)
-# df = df.head(n=rows)
+# df = df.iloc[:rows]
 df = df.dropna()
 df = df.drop(labels='ocean_proximity', axis=1)
 
@@ -37,12 +36,19 @@ scaler = MinMaxScaler()
 X_train = scaler.fit_transform(X=X_train)
 X_test = scaler.transform(X=X_test)
 
+y_train = scaler.fit_transform(X=X_train, y=y_train)
+
 
 model = Sequential([
     Dense(units=32, input_shape=(8,), activation='relu'),
+    Dense(units=10, activation='relu'),
     Dense(units=1, activation='relu')
 ])
 
-model.compile(loss='categorical_crossentropy', metrics=['accuracy'])
+model.compile(optimizer='adam', loss='mse')
 
-model.fit(x=X_train, y=y_train, epochs=1)
+history = model.fit(x=X_train, y=y_train, epochs=10)
+
+losses = pd.DataFrame(model.history.history)
+losses.plot()
+plt.show()
