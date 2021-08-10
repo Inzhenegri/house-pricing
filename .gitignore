@@ -1,3 +1,9 @@
 .vscode
 __pycache__/
 test.py
+*.png
+*.pb
+*.h5
+variables
+logs
+assets
