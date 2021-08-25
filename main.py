@@ -1,16 +1,20 @@
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, InputLayer
+from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.initializers import Zeros
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.layers.experimental.preprocessing import Normalization
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
+from matplotlib import pyplot
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from tabulate import tabulate
 
-from tb import tensorboard_callback
+# from tb import tensorboard_callback
+from functions import plot_loss
 
 
 # print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
@@ -24,42 +28,47 @@ df = pd.read_csv(path)
 df = df.dropna()
 df = df.drop(labels='ocean_proximity', axis=1)
 
-plt.show()
-
 columns = df.columns
 
-plt.figure(figsize=(10, 8))
-sns.heatmap(data=df.corr(), annot=True)
+train_dataset = df.sample(frac=0.2)
+test_dataset = df.drop(train_dataset.index)
 
+train_features = train_dataset.copy()
+test_features = test_dataset.copy()
 
-scaler = MinMaxScaler()
+train_labels = train_features.pop('median_house_value')
+test_labels = test_features.pop('median_house_value')
 
-df = scaler.fit_transform(df)
-df = pd.DataFrame(df, columns=columns)
+normalizer = Normalization(axis=-1)
+normalizer.adapt(data=np.array(train_features))
 
-X = df.drop(labels='median_house_value', axis=1)
-y = df.median_house_value
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-
+train_labels = normalizer(train_labels)
+test_labels = normalizer(test_labels)
 
 model = Sequential([
-    Dense(units=32, input_shape=(8,), activation='relu'),
-    Dense(units=10, activation='relu'),
-    Dense(units=1, activation='relu')
+    # Dense(units=8, input_shape=(8,)),
+    normalizer,
+    Dense(units=4, activation='relu'),
+    Dense(units=1)
 ])
 
-model.compile(optimizer=Adam(learning_rate=0.001), loss='mape', metrics=['mape'])
+model.compile(optimizer=Adam(learning_rate=0.1), loss='mse', metrics=['mse'])
 
 history = model.fit(
-    x=X_train,
-    y=y_train,
+    x=train_features,
+    y=train_labels,
     epochs=50,
-    # callbacks=[tensorboard_callback]
+    # validation_data=(test_features, test_labels)
 )
 
 model.save(filepath='my_model.h5')
 
 losses = pd.DataFrame(model.history.history)
-losses.plot()
-plt.show()
+
+evaluated = model.evaluate(x=test_features, y=test_labels)
+
+pyplot.plot(history.history['mse'])
+pyplot.plot(history.history['mae'])
+pyplot.plot(history.history['mape'])
+
+pyplot.show()
