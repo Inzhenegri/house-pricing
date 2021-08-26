@@ -1,4 +1,5 @@
-import tensorflow as tf
+from tensorflow.keras import metrics
+from tensorflow.keras import initializers
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.optimizers import Adam
@@ -42,17 +43,15 @@ test_labels = test_features.pop('median_house_value')
 normalizer = Normalization(axis=-1)
 normalizer.adapt(data=np.array(train_features))
 
-train_labels = normalizer(train_labels)
-test_labels = normalizer(test_labels)
+print(train_features.shape)
 
 model = Sequential([
-    # Dense(units=8, input_shape=(8,)),
     normalizer,
     Dense(units=4, activation='relu'),
     Dense(units=1)
 ])
 
-model.compile(optimizer=Adam(learning_rate=0.1), loss='mse', metrics=['mse'])
+model.compile(optimizer=Adam(learning_rate=0.1), loss='mse', metrics=[metrics.RootMeanSquaredError(), 'mape'])
 
 history = model.fit(
     x=train_features,
@@ -67,8 +66,9 @@ losses = pd.DataFrame(model.history.history)
 
 evaluated = model.evaluate(x=test_features, y=test_labels)
 
-pyplot.plot(history.history['mse'])
-pyplot.plot(history.history['mae'])
-pyplot.plot(history.history['mape'])
+pyplot.plot(history.history['root_mean_squared_error'], label='root_mean_squared_error')
+pyplot.plot(history.history['mae'], label='mae')
+pyplot.plot(history.history['mape'], label='mape')
 
+pyplot.legend()
 pyplot.show()
