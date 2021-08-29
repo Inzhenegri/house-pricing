@@ -43,8 +43,6 @@ test_labels = test_features.pop('median_house_value')
 normalizer = Normalization(axis=-1)
 normalizer.adapt(data=np.array(train_features))
 
-print(train_features.shape)
-
 model = Sequential([
     normalizer,
     Dense(units=4, activation='relu'),
